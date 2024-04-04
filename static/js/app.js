@@ -1,20 +1,26 @@
 const url = "https://static.bc-edx.com/data/dl-1-2/m14/lms/starter/samples.json"
 
-// Function for initializing the page
+// Function to initialize the page
 function init() {
-    //  Dropdown menu
+
+    // Select the dropdown menu
     let dropdownMenu = d3.select("#selDataset");
-    // Loading URL data 
+
+    // Load the data from the provided URL
     d3.json(url).then(function (data) {
         console.log(data);
-        // Extracting names from the data
+
+        // Extract names from the data
         let names = data.names;
 
-        // Populating the dropdown menu with options
+        // Populate the dropdown menu with options
         names.forEach(function (name) {
             dropdownMenu.append('option').text(name).property('value', name);
         });
+
+        // Set the initial selected name to the first one
         let name = names[0];
+
         // Call functions to create visualizations
         bar(name);
         bubble(name);
@@ -22,18 +28,22 @@ function init() {
     });
 }
 
-// Bar chart Function
+// Function to create a bar chart
 function bar(value) {
     d3.json(url).then(function (data) {
-        // Extracting samples data 
+
+        // Extract samples data from the loaded data
         let samples = data.samples;
-        // Filtering sample data based on value
+
+        // Filter samples data based on the selected value
         let filteredData = samples.filter(function (sample) {
             return sample.id === value;
         });
-        // Extracting the sample data for the first item in the filtered data
+
+        // Extract the sample data for the first item in the filtered data
         let sampleData = filteredData[0];
-        // Creating a bar chart trace
+
+        // Create a bar chart trace
         let traceBar = [{
             x: sampleData.sample_values.slice(0, 10).reverse(),
             y: sampleData.otu_ids.slice(0, 10).map((otu_id) => `OTU ${otu_id}`).reverse(),
@@ -41,23 +51,28 @@ function bar(value) {
             type: "bar",
             orientation: 'h'
         }];
+
         // Create a new bar chart using Plotly
         Plotly.newPlot('bar', traceBar);
     });
 }
 
-//  Bubble chart Function
+// Function to create a bubble chart
 function bubble(value) {
     d3.json(url).then(function (data) {
-        // Extracting samples data 
+
+        // Extract samples data from the loaded data
         let samples = data.samples;
-        // Filtering samples data 
+
+        // Filter samples data based on the selected value
         let filteredData = samples.filter(function (sample) {
             return sample.id === value;
         });
-        // Extracting the sample data for the first item in the filtered data
+
+        // Extract the sample data for the first item in the filtered data
         let sampleData = filteredData[0];
-        // Creating a bubble chart trace
+
+        // Create a bubble chart trace
         let traceBubble = {
             x: sampleData.otu_ids,
             y: sampleData.sample_values,
@@ -68,36 +83,45 @@ function bubble(value) {
                 size: sampleData.sample_values
             }
         };
-        // Creating a new bubble chart using Plotly
+
+        // Create a new bubble chart using Plotly
         Plotly.newPlot('bubble', [traceBubble]);
     });
 }
 
-// Function to display metadata panel information
+// Function to display information in the metadata panel
 function info(value) {
+
     d3.json(url).then(function (data) {
-        // Extracting metadata 
+
+        // Extract metadata from the loaded data
         let metadata = data.metadata;
-        // Filtering metadata 
+
+        // Filter metadata based on the selected value
         let filteredData = metadata.filter(function (meta) {
             return meta.id == value;
         });
+
         // Extract the metadata for the first item in the filtered data
         let obj = filteredData[0];
-        // Converting metadata into key-value pairs
+
+        // Convert metadata into key-value pairs
         let entries = Object.entries(obj);
-        // Clearing existing content in the metadata panel
+
+        // Clear existing content in the metadata panel
         d3.select("#sample-metadata").html("");
-        // Displaying metadata information in the panel
+
+        // Display metadata information in the panel
         entries.forEach(([key, value]) => {
             d3.select("#sample-metadata").append("h5").text(`${key}: ${value}`);
         });
     });
 }
 
-// Function to handle the dropdown option changes
+// Function to handle the event when the dropdown option changes
 function optionChanged(value) {
-    // Calling functions to update visualizations based on the selected value
+    
+    // Call functions to update visualizations based on the selected value
     info(value);
     bar(value);
     bubble(value);
